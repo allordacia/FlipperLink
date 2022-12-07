@@ -1,15 +1,22 @@
-import pwnagotchi
+import logging
+import os
+import subprocess
+import time
+from threading import Lock
+
+import dbus
+
 import pwnagotchi.plugins as plugins
-import pwnagotchi.ui.faces as faces
 import pwnagotchi.ui.fonts as fonts
 from pwnagotchi.ui.components import LabeledValue
 from pwnagotchi.ui.view import BLACK
-import pwnagotchi.utils as utils
-from pwnagotchi.ui.components import *
-from pwnagotchi.ui.state import State
-import logging
-from time import sleep
-import os
+from pwnagotchi.utils import StatusFile
+
+class BTError(Exception):
+    """
+    Custom bluetooth exception
+    """
+    pass
 
 class FlipperLink(plugins.Plugin):
     __author__ = 'Allordacia'
