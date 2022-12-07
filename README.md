@@ -4,7 +4,7 @@ Pwnagotchi plugin for interfacing with the Flipper Zero via bluetooth
 # Active Development
 Currently, the plugin will connect to the Flipper Zero as long as the user has previously used bluetoothctl to pair the pwnagotchi with the Flipper Zero. Once the plugin is turned on, it will begin trying to connect to the Flipper and update the pwnagotchi screen with a message that shows whether or not the connection is currently active.
 
-# Current Features
+# Current Features:
 -   Provide interface to show whether or not the Flipper was able to be successfully connected to by the pwnagotchi device.
     + Need to add a variable that the user will provide the mac address of their Flipper to in the pwnagotchi config file
 
