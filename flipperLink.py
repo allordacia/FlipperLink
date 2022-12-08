@@ -1,22 +1,15 @@
-import logging
-import os
-import subprocess
-import time
-from threading import Lock
-
-import dbus
-
+import pwnagotchi
 import pwnagotchi.plugins as plugins
+import pwnagotchi.ui.faces as faces
 import pwnagotchi.ui.fonts as fonts
 from pwnagotchi.ui.components import LabeledValue
 from pwnagotchi.ui.view import BLACK
-from pwnagotchi.utils import StatusFile
-
-class BTError(Exception):
-    """
-    Custom bluetooth exception
-    """
-    pass
+import pwnagotchi.utils as utils
+from pwnagotchi.ui.components import *
+from pwnagotchi.ui.state import State
+import logging
+from time import sleep
+import os
 
 class FlipperLink(plugins.Plugin):
     __author__ = 'Allordacia'
@@ -26,13 +19,12 @@ class FlipperLink(plugins.Plugin):
 
     def __init__(self):
         # Check if the Flipper Zero is connected via bluetooth  
+        self.running = False
+
+    def on_loaded(self):
         self.flipper_connected = False
         self.flipper_connected = self.check_flipper()
         logging.info(self.flipper_connected)
-        # Get the MAC address of the Flipper Zero provided by the user in the config file
-        self.addr = self.options.get('address')
-
-    def on_loaded(self):
         logging.info("FlipperLink plugin loaded.")
 
     def on_ready(self, agent):
@@ -56,11 +48,11 @@ class FlipperLink(plugins.Plugin):
 
     def check_flipper(self):
         flipper_connected = False
-        addr = self.addr
         while not flipper_connected:
-            flipper_connected = os.system("sudo bluetoothctl connect " + addr + "| grep -q 'Connection successful'")
+            flipper_connected = os.system("sudo bluetoothctl connect " + self.options['mac'] + "| grep -q 'Connection successful'")
             if flipper_connected == 0:
                 flipper_connected = True
+                logging.info("flipperLink has conencted to %s" % self.options['mac'])
             else:
                 flipper_connected = False
             sleep(1)
