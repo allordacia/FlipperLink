@@ -1,15 +1,16 @@
-import pwnagotchi
+import logging
+import os, sys, time, types, subprocess, signal
+import subprocess
+from threading import Lock
+
+import bluetooth
+
 import pwnagotchi.plugins as plugins
-import pwnagotchi.ui.faces as faces
 import pwnagotchi.ui.fonts as fonts
 from pwnagotchi.ui.components import LabeledValue
 from pwnagotchi.ui.view import BLACK
-import pwnagotchi.utils as utils
-from pwnagotchi.ui.components import *
-from pwnagotchi.ui.state import State
-import logging
-from time import sleep
-import os
+from pwnagotchi.utils import StatusFile
+
 
 class FlipperLink(plugins.Plugin):
     __author__ = 'Allordacia'
@@ -32,7 +33,7 @@ class FlipperLink(plugins.Plugin):
 
     def on_ui_setup(self, ui):
         # Add elements to the UI
-        ui.add_element('flipperlink', LabeledValue(color=BLACK, label='Flipper: ', value='Not Connected',
+        ui.add_element('flipperlink', LabeledValue(color=BLACK, label='Flipper: ', value=self.flipper_connected,
                                            position=(2, ui.height() - 30),
                                            label_font=fonts.Bold, text_font=fonts.Medium))
 
@@ -41,21 +42,31 @@ class FlipperLink(plugins.Plugin):
             ui.remove_element('flipperlink')
 
     def on_ui_update(self, ui):
-        if self.flipper_connected:
+        # Update the UI
+        
+        if self.flipper_connected == True:
             ui.set('flipperlink', value='Connected')
         else:
-            ui.set('flipperlink', value='Not Connected')
+            self.flipper_connected = self.check_flipper()
+            if self.flipper_connected == True:
+                ui.set('flipperlink', value='Connected')
+            else:
+                ui.set('flipperlink', value='Not Connected')
 
     def check_flipper(self):
         flipper_connected = False
-        while not flipper_connected:
-            flipper_connected = os.system("sudo bluetoothctl connect " + self.options['mac'] + "| grep -q 'Connection successful'")
-            if flipper_connected == 0:
-                flipper_connected = True
-                logging.info("flipperLink has conencted to %s" % self.options['mac'])
-            else:
-                flipper_connected = False
-            sleep(1)
+    
+        # Using pyBluez to check if self.options['mac'] is connected
+        try:
+            nearby_devices = bluetooth.discover_devices()
+            logging.info(nearby_devices)
+            for bdaddr in nearby_devices:
+                if bdaddr == self.options['mac']:
+                    flipper_connected = True
+        except:
+            flipper_connected = False
+
+
+            
 
         return flipper_connected
-
