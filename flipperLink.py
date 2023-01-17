@@ -19,7 +19,6 @@ class FlipperLink(plugins.Plugin):
     __description__ = 'A plugin that will add functionality for pwnagotchi to connect to the Flipper Zero'
 
     def __init__(self):
-        # Check if the Flipper Zero is connected via bluetooth  
         self.running = False
 
     def on_loaded(self):
@@ -55,16 +54,19 @@ class FlipperLink(plugins.Plugin):
 
     def check_flipper(self):
         flipper_connected = False
-    
-        # Using pyBluez to check if self.options['mac'] is connected
         try:
             nearby_devices = bluetooth.discover_devices()
-            logging.info(nearby_devices)
             for bdaddr in nearby_devices:
                 if bdaddr == self.options['mac']:
                     flipper_connected = True
-        except:
-            flipper_connected = False
+                    logging.info("Flipper device found with MAC address: %s", bdaddr)
+                    break
+        except bluetooth.BluetoothError as e:
+            logging.error("Bluetooth error while searching for Flipper device: %s", e)
+        except Exception as e:
+            logging.error("Unexpected error while searching for Flipper device: %s", e)
+
+        return flipper_connected
 
 
             
